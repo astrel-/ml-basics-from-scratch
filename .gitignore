@@ -1,0 +1,12 @@
+# C++
+build/
+*.exe
+*.obj
+*.pdb
+*.vcxproj.user
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.env/
