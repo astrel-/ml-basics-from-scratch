@@ -11,13 +11,32 @@ find_package(ZLIB REQUIRED)
 add_library(cnpy STATIC
     ${CMAKE_CURRENT_LIST_DIR}/../../../third_party/cnpy/cnpy.cpp
 )
+
+message(STATUS "CMAKE_SOURCE_DIR = ${CMAKE_SOURCE_DIR}")
+message(STATUS "CMAKE_CURRENT_SOURCE_DIR = ${CMAKE_CURRENT_SOURCE_DIR}")
+
 target_include_directories(cnpy PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/../../../third_party/cnpy
 )
 target_link_libraries(cnpy PUBLIC ZLIB::ZLIB)
 
+
 add_executable(knn
     src/main.cpp
+)
+
+get_filename_component(REPO_ROOT
+    "${CMAKE_CURRENT_LIST_DIR}/../../../"
+    ABSOLUTE
+)
+target_compile_definitions(knn PRIVATE
+    PROJECT_ROOT="${REPO_ROOT}"
+)
+target_compile_definitions(knn PRIVATE
+    TRAIN_DATA_PATH="${REPO_ROOT}/methods/kNN/data/train_data.npz"
+)
+target_compile_definitions(knn PRIVATE
+    TEST_DATA_PATH="${REPO_ROOT}/methods/kNN/data/test_data.npz"
 )
 
 target_include_directories(knn PRIVATE include)

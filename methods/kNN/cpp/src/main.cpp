@@ -1,13 +1,18 @@
 #include "cnpy.h"
 #include <vector>
 #include <iostream>
+#include <filesystem>
+
+constexpr const char* kTrainPath = TRAIN_DATA_PATH;
+constexpr const char* kTestPath = TEST_DATA_PATH;
 
 int main() {
-    std::vector<float> X = { 1,2,3,4,5,6 };   // 2x3
-    //cnpy::npz_save("train_data.npz", "X", X.data(), { 2,3 }, "w");
+    std::filesystem::path trainPath{ kTrainPath };
+    std::filesystem::path testPath{ kTrainPath };
 
-    cnpy::NpyArray arr = cnpy::npz_load("train_data.npz", "X");
-    float* p = arr.data<float>();
+    auto arr = cnpy::npz_load(trainPath.string(), "X");
+
+    double* X = arr.data<double>();
 
     std::cout << "shape: ";
     for (auto d : arr.shape) std::cout << d << " ";
