@@ -1,0 +1,5 @@
+{
+  "name": "ml-basics-from-scratch",
+  "version-string": "0.1.0",
+  "dependencies": ["zlib"]
+}
