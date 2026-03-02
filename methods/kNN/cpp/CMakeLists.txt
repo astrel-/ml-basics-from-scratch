@@ -20,6 +20,8 @@ target_include_directories(cnpy PUBLIC
 )
 target_link_libraries(cnpy PUBLIC ZLIB::ZLIB)
 
+# openblas
+find_package(OpenBLAS CONFIG REQUIRED)
 
 add_executable(knn
     src/main.cpp
@@ -41,3 +43,4 @@ target_compile_definitions(knn PRIVATE
 
 target_include_directories(knn PRIVATE include)
 target_link_libraries(knn PRIVATE cnpy)
+target_link_libraries(knn PRIVATE OpenBLAS::OpenBLAS)
