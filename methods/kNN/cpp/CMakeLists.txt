@@ -25,7 +25,10 @@ find_package(OpenBLAS CONFIG REQUIRED)
 
 add_executable(knn
     src/main.cpp
-)
+    src/kNN.cpp
+    src/io/numpy.cpp
+    src/Matrix.cpp
+    src/LinAlg.cpp)
 
 get_filename_component(REPO_ROOT
     "${CMAKE_CURRENT_LIST_DIR}/../../../"
