@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <span>
 #include <vector>
 
 namespace matrix {
@@ -8,10 +9,13 @@ namespace matrix {
 
     class Matrix2D {
     public:
+        Matrix2D();
         Matrix2D(std::vector<double> buffer_, size_t rows_, size_t cols_);
 
         double& operator() (size_t row, size_t col);
         const double& operator() (size_t row, size_t col) const;
+        std::span<double> row(size_t row);
+        std::span<const double> row(size_t row) const;
 
     public:
         size_t rows;
