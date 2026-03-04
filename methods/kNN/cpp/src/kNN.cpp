@@ -4,6 +4,8 @@
 #include <stdexcept>
 #include <limits>
 #include <span>
+#include <vector>
+#include <algorithm>
 
 namespace kNN {
 	namespace util {
@@ -29,8 +31,31 @@ namespace kNN {
 	}
 }
 
+using DistanceHeap = kNN::util::MaxHeapMaxSize<kNN::util::DistanceIndex, kNN::util::CompareDistanceIndex>;
 
 namespace kNN {
+
+	static int classifyAndEmptyHeap(DistanceHeap& heap, const matrix::Vector1D& yTrain, std::vector<int>& classCounter, int yMin) {
+		while (!heap.empty()) {
+			auto [_, index] = heap.top();
+			auto yClass = static_cast<int>(yTrain[index]);
+			classCounter[yClass-yMin]++;
+			heap.pop();
+		}
+
+		int maxClassCounter = 0;
+		int maxClassIndex = 0;
+		for (int i = 0; i < classCounter.size(); i++) {
+			auto& cc = classCounter[i];
+			if (cc > maxClassCounter) {
+				maxClassCounter = cc;
+				maxClassIndex = i;
+			}
+			cc = 0; // empty vector while traversing
+		}
+
+		return maxClassIndex + yMin;
+	}
 
 	CustomKNeighborsClassifier::CustomKNeighborsClassifier(int n)
 		: n_neighbours(n) { }
@@ -40,30 +65,30 @@ namespace kNN {
 		yTrain = yTrain_;
 		nTrainSamples = xTrain_.rows;
 		nTrainFeatures = xTrain_.cols;
+		auto [minIt, maxIt] = std::minmax_element(yTrain_.begin(), yTrain_.end());
+		yMax = *maxIt;
+		yMin = *minIt;
 	}
 
 	matrix::Vector1D CustomKNeighborsClassifier::predict(const matrix::Matrix2D& xTest_) const
 	{
-		matrix::Vector1D yPred;
 		auto nSamples = xTest_.rows;
 		auto nFeatures = xTest_.cols;
 		if (nFeatures != nTrainFeatures)
 			throw std::runtime_error(std::format("Train Data has {} features, Test Data has {} features.", nTrainFeatures, nFeatures));
-		yPred.resize(nSamples);
+		matrix::Vector1D yPred (nSamples);
+		DistanceHeap heap(n_neighbours);
+		std::vector<int> classCounter(yMax - yMin + 1);
 
 		for (int i = 0; i < nSamples; i++) {
-			const auto& x_i = xTest_.row(i);
-			int closestNeighborIndex = 0;
-			double closestNeighbourDistance = std::numeric_limits<double>::infinity();
+			auto x_i = xTest_.row(i);
 
 			for (int j = 0; j < nTrainSamples; j++) {
 				auto distance = kNN::util::calcDistanceSq(x_i, xTrain.row(j));
-				if (distance < closestNeighbourDistance) {
-					closestNeighbourDistance = distance;
-					closestNeighborIndex = j;
-				}
+				heap.push({ distance, j });
 			}
-			yPred[i] = yTrain[closestNeighborIndex];
+
+			yPred[i] = classifyAndEmptyHeap(heap, yTrain, classCounter, yMin);
 		}
 
 		return yPred;

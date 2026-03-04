@@ -1,6 +1,8 @@
 #pragma once
 #include "Matrix.h"
 #include <cstddef>
+#include <queue>
+#include <vector>
 
 namespace kNN {
 
@@ -26,5 +28,52 @@ namespace kNN {
 	namespace util {
 		double calcDistanceSq(std::span<const double> x, std::span<const double> other);
 		double calcAccuracyScore(const matrix::Vector1D& yPred, const matrix::Vector1D& yTest);
+
+		struct DistanceIndex {
+			double distance;
+			int index;
+		};
+
+		struct CompareDistanceIndex {
+			bool operator()(const DistanceIndex& a, const DistanceIndex& b) const {
+				return a.distance < b.distance;
+			}
+		};
+
+		template<class T, class Compare>
+		class MaxHeapMaxSize {
+		public:
+			MaxHeapMaxSize(size_t maxSize_)
+				: maxSize(maxSize_) {}
+			void push(const T& value) {
+				if (maxHeap.size() < maxSize) {
+					maxHeap.push(value);
+					return;
+				}
+				if (comp(value, maxHeap.top())) {
+					maxHeap.pop();
+					maxHeap.push(value);
+					return;
+				}
+				return;
+			}
+
+			const T& top() const {
+				return maxHeap.top();
+			}
+
+			void pop() {
+				maxHeap.pop();
+			}
+
+			bool empty() const {
+				return maxHeap.empty();
+			}
+
+		private:
+			size_t maxSize;
+			std::priority_queue<T, std::vector<T>, Compare> maxHeap;
+			Compare comp;
+		};
 	}
 }

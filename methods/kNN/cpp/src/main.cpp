@@ -7,7 +7,7 @@ int main() {
     auto [xTrain, yTrain] = io::numpy::readXY(TRAIN_DATA_PATH);
     auto [xTest, yTest] = io::numpy::readXY(TEST_DATA_PATH);
 
-    int k = 1;
+    int k = 3;
     kNN::CustomKNeighborsClassifier knnClassifier(k);
     knnClassifier.fit(xTrain, yTrain);
     auto yPred = knnClassifier.predict(xTest);
