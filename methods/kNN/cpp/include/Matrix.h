@@ -4,6 +4,8 @@
 
 namespace matrix {
 
+    using Vector1D = std::vector<std::int8_t>;
+
     class Matrix2D {
     public:
         Matrix2D(std::vector<double> buffer_, size_t rows_, size_t cols_);
@@ -23,6 +25,6 @@ namespace matrix {
 
     struct XY {
         Matrix2D X;
-        std::vector<std::int8_t> y;
+        Vector1D y;
     };
 }

@@ -29,7 +29,7 @@ namespace io::numpy {
         return matrix::Matrix2D(buffer, rows, cols);
     }
 
-    std::vector<std::int8_t> read1D(const cnpy::NpyArray& array) {
+    matrix::Vector1D read1D(const cnpy::NpyArray& array) {
         const auto& shape = array.shape;
         if (shape.size() > 2)
             throw std::runtime_error("Must be either 2D-array or 1D-array");
