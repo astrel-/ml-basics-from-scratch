@@ -1,7 +1,5 @@
 #pragma once
 #include "Matrix.h"
-#include <vector>
-#include <cstdint>
 
 namespace cnpy {
 	struct NpyArray;

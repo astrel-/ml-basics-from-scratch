@@ -2,10 +2,10 @@
 #include "Matrix.h"
 #include <format>
 #include <stdexcept>
-#include <limits>
 #include <span>
 #include <vector>
 #include <algorithm>
+#include <cstdint>
 
 namespace kNN {
 	namespace util {
@@ -22,7 +22,7 @@ namespace kNN {
 		double calcAccuracyScore(const matrix::Vector1D& yPred, const matrix::Vector1D& yTest)
 		{
 			int sum = 0;
-			int n = yPred.size();
+			auto n = yPred.size();
 			for (size_t i = 0; i < n; i++) {
 				sum += (yPred[i] == yTest[i]);
 			}
@@ -35,17 +35,19 @@ using DistanceHeap = kNN::util::MaxHeapMaxSize<kNN::util::DistanceIndex, kNN::ut
 
 namespace kNN {
 
-	static int classifyAndEmptyHeap(DistanceHeap& heap, const matrix::Vector1D& yTrain, std::vector<int>& classCounter, int yMin) {
+	static std::int8_t classifyAndEmptyHeap(DistanceHeap& heap, const matrix::Vector1D& yTrain, std::vector<int>& classCounter, std::int8_t yMin) {
 		while (!heap.empty()) {
 			auto [_, index] = heap.top();
-			auto yClass = static_cast<int>(yTrain[index]);
-			classCounter[yClass-yMin]++;
+			auto yClass = static_cast<int8_t>(yTrain[index]);
+			int idx = yClass - yMin;
+			size_t counterArrayIdx = static_cast<size_t>(idx);
+			classCounter[counterArrayIdx]++;
 			heap.pop();
 		}
 
 		int maxClassCounter = 0;
-		int maxClassIndex = 0;
-		for (int i = 0; i < classCounter.size(); i++) {
+		std::int8_t maxClassIndex = 0;
+		for (std::int8_t i = 0; i < classCounter.size(); i++) {
 			auto& cc = classCounter[i];
 			if (cc > maxClassCounter) {
 				maxClassCounter = cc;

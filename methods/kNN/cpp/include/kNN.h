@@ -1,8 +1,9 @@
 #pragma once
 #include "Matrix.h"
-#include <cstddef>
 #include <queue>
 #include <vector>
+#include <cstdint>
+#include <span>
 
 namespace kNN {
 
@@ -15,12 +16,12 @@ namespace kNN {
 
 	private:
 		int n_neighbours;
-		matrix::Matrix2D xTrain;
-		matrix::Vector1D yTrain;
-		int yMax;
-		int yMin;
-		size_t nTrainSamples;
-		size_t nTrainFeatures;
+		matrix::Matrix2D xTrain{};
+		matrix::Vector1D yTrain{};
+		std::int8_t yMax = 0;
+		std::int8_t yMin = 0;
+		size_t nTrainSamples = 0;
+		size_t nTrainFeatures = 0;
 	};
 }
 

@@ -1,5 +1,4 @@
 #include "knn.h"
-#include <vector>
 #include <iostream>
 #include <io/numpy.h>
 

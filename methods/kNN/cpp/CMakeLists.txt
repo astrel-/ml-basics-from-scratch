@@ -30,6 +30,13 @@ add_executable(knn
     src/Matrix.cpp
     src/LinAlg.cpp)
 
+# Disable MSVC static analyzer warnings
+if (MSVC)
+    target_compile_options(knn PRIVATE /W4 /analyze-)
+else()
+    target_compile_options(knn PRIVATE -Wall -Wextra -Wpedantic)
+endif()
+
 get_filename_component(REPO_ROOT
     "${CMAKE_CURRENT_LIST_DIR}/../../../"
     ABSOLUTE

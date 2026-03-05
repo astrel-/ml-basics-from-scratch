@@ -1,12 +1,13 @@
 #include "LinAlg.h"
-#include <vector>
+#include "Matrix.h"
 #include <cblas.h>
-#include <stdexcept>
 #include <limits>
+#include <stdexcept>
+#include <vector>
 
 namespace linalg {
 
-    std::vector<double> matmul_raw(
+    static std::vector<double> matmul_raw(
         const double* A,
         const double* B,
         int k,
@@ -33,7 +34,7 @@ namespace linalg {
         return C;
     }
 
-    int size_t_to_int(std::size_t value) {
+    static int size_t_to_int(std::size_t value) {
         if (value > static_cast<std::size_t>(std::numeric_limits<int>::max())) {
             throw std::overflow_error("Matrix dimension exceeds BLAS int limit");
         }
