@@ -7,12 +7,17 @@
 
 namespace kNN {
 
+	enum class KNeighborsImplementation {
+		Naive,
+		Vectorized
+	};
+
 	class CustomKNeighborsClassifier {
 
 	public:
 		CustomKNeighborsClassifier(int n);
 		void fit(const matrix::Matrix2D& xTrain_, const matrix::Vector1D& yTrain_);
-		matrix::Vector1D predict(const matrix::Matrix2D& xTest_) const;
+		matrix::Vector1D predict(const matrix::Matrix2D& xTest_, KNeighborsImplementation impl = KNeighborsImplementation::Naive) const;
 
 	private:
 		int n_neighbours;
@@ -22,6 +27,10 @@ namespace kNN {
 		std::int8_t yMin = 0;
 		size_t nTrainSamples = 0;
 		size_t nTrainFeatures = 0;
+
+		matrix::Vector1D predictNaive(const matrix::Matrix2D& xTest_) const;
+		matrix::Vector1D predictVectorized(const matrix::Matrix2D& xTest_) const;
+
 	};
 }
 
@@ -32,7 +41,7 @@ namespace kNN {
 
 		struct DistanceIndex {
 			double distance;
-			int index;
+			size_t index;
 		};
 
 		struct CompareDistanceIndex {

@@ -1,11 +1,13 @@
 #include "kNN.h"
 #include "Matrix.h"
+#include "LinAlg.h"
 #include <format>
 #include <stdexcept>
 #include <span>
 #include <vector>
 #include <algorithm>
 #include <cstdint>
+
 
 namespace kNN {
 	namespace util {
@@ -15,6 +17,14 @@ namespace kNN {
 			for (size_t idx = 0; idx < x.size(); idx++) {
 				double diff = x[idx] - other[idx];
 				product += diff * diff;
+			}
+			return product;
+		}
+
+		double calcSq(std::span<const double> x) {
+			double product = 0.0;
+			for (size_t idx = 0; idx < x.size(); idx++) {
+				product += x[idx] * x[idx];
 			}
 			return product;
 		}
@@ -72,7 +82,7 @@ namespace kNN {
 		yMin = *minIt;
 	}
 
-	matrix::Vector1D CustomKNeighborsClassifier::predict(const matrix::Matrix2D& xTest_) const
+	matrix::Vector1D CustomKNeighborsClassifier::predictNaive(const matrix::Matrix2D& xTest_) const
 	{
 		auto nSamples = xTest_.rows;
 		auto nFeatures = xTest_.cols;
@@ -82,10 +92,10 @@ namespace kNN {
 		DistanceHeap heap(n_neighbours);
 		std::vector<int> classCounter(yMax - yMin + 1);
 
-		for (int i = 0; i < nSamples; i++) {
+		for (size_t i = 0; i < nSamples; i++) {
 			auto x_i = xTest_.row(i);
 
-			for (int j = 0; j < nTrainSamples; j++) {
+			for (size_t j = 0; j < nTrainSamples; j++) {
 				auto distance = kNN::util::calcDistanceSq(x_i, xTrain.row(j));
 				heap.push({ distance, j });
 			}
@@ -94,5 +104,53 @@ namespace kNN {
 		}
 
 		return yPred;
+	}
+
+	matrix::Vector1D CustomKNeighborsClassifier::predictVectorized(const matrix::Matrix2D& xTest_) const
+	{
+		auto nSamples = xTest_.rows;
+		auto nFeatures = xTest_.cols;
+		if (nFeatures != nTrainFeatures)
+			throw std::runtime_error(std::format("Train Data has {} features, Test Data has {} features.", nTrainFeatures, nFeatures));
+		matrix::Vector1D yPred(nSamples);
+
+		// Matrix of pairwise distances from XTest to XTrain
+		// ||a-b||^2 = A^2 + B^2 - 2*AB^T
+		matrix::Matrix2D distances{ linalg::matmul_AB_T(xTest_, xTrain, /*alpha=*/-2.0)};
+		for (size_t row_idx = 0; row_idx < xTest_.rows; row_idx++) {
+			auto aSq = kNN::util::calcSq(xTest_.row(row_idx));
+			distances.add_to_row(row_idx, aSq);
+		}
+		for (size_t col_idx = 0; col_idx < xTrain.rows; col_idx++) {
+			auto bSq = kNN::util::calcSq(xTrain.row(col_idx));
+			distances.add_to_col(col_idx, bSq);
+		}
+
+		DistanceHeap heap(n_neighbours);
+		std::vector<int> classCounter(yMax - yMin + 1);
+
+		for (size_t i = 0; i < nSamples; i++) {
+			auto distances_i = distances.row(i);
+			for (size_t j = 0; j < nTrainSamples; j++) {
+				heap.push({ distances_i[j], j});
+			}
+
+			yPred[i] = classifyAndEmptyHeap(heap, yTrain, classCounter, yMin);
+		}
+
+		return yPred;
+	}
+
+	matrix::Vector1D CustomKNeighborsClassifier::predict(const matrix::Matrix2D& xTest_, KNeighborsImplementation impl) const {
+		switch (impl) {
+			case KNeighborsImplementation::Naive:
+				return predictNaive(xTest_);
+
+			case KNeighborsImplementation::Vectorized:
+				return predictVectorized(xTest_);
+
+			default:
+				throw std::runtime_error(std::format("Unknown Implementation Method Requested: {}", static_cast<int>(impl)));
+		}
 	}
 }
