@@ -98,20 +98,27 @@ namespace kNN {
 		xTrain = xTrain_;
 		yTrain = yTrain_;
 		nTrainSamples = xTrain_.rows;
-		nTrainFeatures = xTrain_.cols;
+		nFeatures = xTrain_.cols;
 		auto [minIt, maxIt] = std::minmax_element(yTrain_.begin(), yTrain_.end());
 		yMax = *maxIt;
 		yMin = *minIt;
 	}
 
+	void CustomKNeighborsClassifier::validate(const matrix::Matrix2D& xTest_) const {
+		if (nTrainSamples == 0) {
+			throw std::runtime_error("Fit Method hasn't been called. Please call it first");
+		}
+		auto nTestFeatures = xTest_.cols;
+		if (nFeatures != nTestFeatures)
+			throw std::runtime_error(std::format("Train Data has {} features, Test Data has {} features.", nFeatures, nTestFeatures));
+		if (n_neighbours > yTrain.size())
+			throw std::runtime_error(std::format("Train Data has fewer samples ({}) than k={}.", nTrainSamples, n_neighbours));
+	}
+
 	matrix::Vector1D CustomKNeighborsClassifier::predictNaive(const matrix::Matrix2D& xTest_) const
 	{
+		validate(xTest_);
 		auto nSamples = xTest_.rows;
-		auto nFeatures = xTest_.cols;
-		if (nFeatures != nTrainFeatures)
-			throw std::runtime_error(std::format("Train Data has {} features, Test Data has {} features.", nTrainFeatures, nFeatures));
-		if (n_neighbours > yTrain.size())
-			throw std::runtime_error(std::format("Train Data has fewer features ({}) than k={}.", nTrainFeatures, n_neighbours));
 		matrix::Vector1D yPred (nSamples);
 		DistanceHeap heap(n_neighbours);
 		std::vector<int> classCounter(yMax - yMin + 1);
@@ -130,27 +137,28 @@ namespace kNN {
 		return yPred;
 	}
 
-	matrix::Vector1D CustomKNeighborsClassifier::predictVectorized(const matrix::Matrix2D& xTest_) const
-	{
-		auto nSamples = xTest_.rows;
-		auto nFeatures = xTest_.cols;
-		if (nFeatures != nTrainFeatures)
-			throw std::runtime_error(std::format("Train Data has {} features, Test Data has {} features.", nTrainFeatures, nFeatures));
-		if (n_neighbours > yTrain.size())
-			throw std::runtime_error(std::format("Train Data has fewer features ({}) than k={}.", nTrainFeatures, n_neighbours));
-		matrix::Vector1D yPred(nSamples);
-
+	static matrix::Matrix2D calcPairwiseDistancesSq(const matrix::Matrix2D& xTest, const matrix::Matrix2D& xTrain) {
 		// Matrix of pairwise distances from XTest to XTrain
 		// ||a-b||^2 = A^2 + B^2 - 2*AB^T
-		matrix::Matrix2D distances{ linalg::matmul_AB_T(xTest_, xTrain, /*alpha=*/-2.0)};
-		for (size_t row_idx = 0; row_idx < xTest_.rows; row_idx++) {
-			auto aSq = kNN::util::calcSq(xTest_.row(row_idx));
+		matrix::Matrix2D distances = linalg::matmul_AB_T(xTest, xTrain, /*alpha=*/-2.0);
+		for (size_t row_idx = 0; row_idx < xTest.rows; row_idx++) {
+			auto aSq = kNN::util::calcSq(xTest.row(row_idx));
 			distances.add_to_row(row_idx, aSq);
 		}
 		for (size_t col_idx = 0; col_idx < xTrain.rows; col_idx++) {
 			auto bSq = kNN::util::calcSq(xTrain.row(col_idx));
 			distances.add_to_col(col_idx, bSq);
 		}
+		return distances;
+	}
+
+	matrix::Vector1D CustomKNeighborsClassifier::predictVectorized(const matrix::Matrix2D& xTest_) const
+	{
+		validate(xTest_);
+		auto nSamples = xTest_.rows;
+		matrix::Vector1D yPred(nSamples);
+
+		auto distances = calcPairwiseDistancesSq(xTest_, xTrain);
 
 		DistanceHeap heap(n_neighbours);
 		std::vector<int> classCounter(yMax - yMin + 1);
@@ -169,26 +177,11 @@ namespace kNN {
 
 	matrix::Vector1D CustomKNeighborsClassifier::predictVectorizedSort(const matrix::Matrix2D& xTest_) const
 	{
+		validate(xTest_);
 		auto nSamples = xTest_.rows;
-		auto nFeatures = xTest_.cols;
-		if (nFeatures != nTrainFeatures)
-			throw std::runtime_error(std::format("Train Data has {} features, Test Data has {} features.", nTrainFeatures, nFeatures));
-		if (n_neighbours > yTrain.size()) 
-			throw std::runtime_error(std::format("Train Data has fewer features ({}) than k={}.", nTrainFeatures, n_neighbours));
-
 		matrix::Vector1D yPred(nSamples);
 
-		// Matrix of pairwise distances from XTest to XTrain
-		// ||a-b||^2 = A^2 + B^2 - 2*AB^T
-		matrix::Matrix2D distances{ linalg::matmul_AB_T(xTest_, xTrain, /*alpha=*/-2.0) };
-		for (size_t row_idx = 0; row_idx < xTest_.rows; row_idx++) {
-			auto aSq = kNN::util::calcSq(xTest_.row(row_idx));
-			distances.add_to_row(row_idx, aSq);
-		}
-		for (size_t col_idx = 0; col_idx < xTrain.rows; col_idx++) {
-			auto bSq = kNN::util::calcSq(xTrain.row(col_idx));
-			distances.add_to_col(col_idx, bSq);
-		}
+		auto distances = calcPairwiseDistancesSq(xTest_, xTrain);
 
 		std::vector<int> classCounter(yMax - yMin + 1);
 		std::vector<size_t> indices(yTrain.size());

@@ -27,8 +27,9 @@ namespace kNN {
 		std::int8_t yMax = 0;
 		std::int8_t yMin = 0;
 		size_t nTrainSamples = 0;
-		size_t nTrainFeatures = 0;
+		size_t nFeatures = 0;
 
+		void validate(const matrix::Matrix2D& xTest_) const;
 		matrix::Vector1D predictNaive(const matrix::Matrix2D& xTest_) const;
 		matrix::Vector1D predictVectorized(const matrix::Matrix2D& xTest_) const;
 		matrix::Vector1D predictVectorizedSort(const matrix::Matrix2D& xTest_) const;
