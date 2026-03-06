@@ -152,7 +152,7 @@ namespace kNN {
 		return yPred;
 	}
 
-	matrix::Vector1D CustomKNeighborsClassifier::predictVectorized(const matrix::Matrix2D& xTest_) const
+	matrix::Vector1D CustomKNeighborsClassifier::predictVectorizedHeap(const matrix::Matrix2D& xTest_) const
 	{
 		validate(xTest_);
 		auto nSamples = xTest_.rows;
@@ -224,8 +224,8 @@ namespace kNN {
 			case KNeighborsImplementation::Naive:
 				return predictNaive(xTest_);
 
-			case KNeighborsImplementation::Vectorized:
-				return predictVectorized(xTest_);
+			case KNeighborsImplementation::VectorizedHeap:
+				return predictVectorizedHeap(xTest_);
 
 			case KNeighborsImplementation::VectorizedSort:
 				return predictVectorizedSort(xTest_);

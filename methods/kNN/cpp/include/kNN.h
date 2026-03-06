@@ -9,7 +9,7 @@ namespace kNN {
 
 	enum class KNeighborsImplementation {
 		Naive,
-		Vectorized,
+		VectorizedHeap,
 		VectorizedSort,
 		VectorizedPartition,
 	};
@@ -32,7 +32,7 @@ namespace kNN {
 
 		void validate(const matrix::Matrix2D& xTest_) const;
 		matrix::Vector1D predictNaive(const matrix::Matrix2D& xTest_) const;
-		matrix::Vector1D predictVectorized(const matrix::Matrix2D& xTest_) const;
+		matrix::Vector1D predictVectorizedHeap(const matrix::Matrix2D& xTest_) const;
 		matrix::Vector1D predictVectorizedSort(const matrix::Matrix2D& xTest_) const;
 		matrix::Vector1D predictVectorizedPartition(const matrix::Matrix2D& xTest_) const;
 	};
