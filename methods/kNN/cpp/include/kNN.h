@@ -11,6 +11,7 @@ namespace kNN {
 		Naive,
 		Vectorized,
 		VectorizedSort,
+		VectorizedPartition,
 	};
 
 	class CustomKNeighborsClassifier {
@@ -33,6 +34,7 @@ namespace kNN {
 		matrix::Vector1D predictNaive(const matrix::Matrix2D& xTest_) const;
 		matrix::Vector1D predictVectorized(const matrix::Matrix2D& xTest_) const;
 		matrix::Vector1D predictVectorizedSort(const matrix::Matrix2D& xTest_) const;
+		matrix::Vector1D predictVectorizedPartition(const matrix::Matrix2D& xTest_) const;
 	};
 }
 

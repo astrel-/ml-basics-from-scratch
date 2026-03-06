@@ -29,6 +29,21 @@ namespace kNN {
 			return product;
 		}
 
+		matrix::Matrix2D calcPairwiseDistancesSq(const matrix::Matrix2D& xTest, const matrix::Matrix2D& xTrain) {
+			// Matrix of pairwise distances from XTest to XTrain
+			// ||a-b||^2 = A^2 + B^2 - 2*AB^T
+			matrix::Matrix2D distances = linalg::matmul_AB_T(xTest, xTrain, /*alpha=*/-2.0);
+			for (size_t row_idx = 0; row_idx < xTest.rows; row_idx++) {
+				auto aSq = calcSq(xTest.row(row_idx));
+				distances.add_to_row(row_idx, aSq);
+			}
+			for (size_t col_idx = 0; col_idx < xTrain.rows; col_idx++) {
+				auto bSq = calcSq(xTrain.row(col_idx));
+				distances.add_to_col(col_idx, bSq);
+			}
+			return distances;
+		}
+
 		double calcAccuracyScore(const matrix::Vector1D& yPred, const matrix::Vector1D& yTest)
 		{
 			int sum = 0;
@@ -137,28 +152,13 @@ namespace kNN {
 		return yPred;
 	}
 
-	static matrix::Matrix2D calcPairwiseDistancesSq(const matrix::Matrix2D& xTest, const matrix::Matrix2D& xTrain) {
-		// Matrix of pairwise distances from XTest to XTrain
-		// ||a-b||^2 = A^2 + B^2 - 2*AB^T
-		matrix::Matrix2D distances = linalg::matmul_AB_T(xTest, xTrain, /*alpha=*/-2.0);
-		for (size_t row_idx = 0; row_idx < xTest.rows; row_idx++) {
-			auto aSq = kNN::util::calcSq(xTest.row(row_idx));
-			distances.add_to_row(row_idx, aSq);
-		}
-		for (size_t col_idx = 0; col_idx < xTrain.rows; col_idx++) {
-			auto bSq = kNN::util::calcSq(xTrain.row(col_idx));
-			distances.add_to_col(col_idx, bSq);
-		}
-		return distances;
-	}
-
 	matrix::Vector1D CustomKNeighborsClassifier::predictVectorized(const matrix::Matrix2D& xTest_) const
 	{
 		validate(xTest_);
 		auto nSamples = xTest_.rows;
 		matrix::Vector1D yPred(nSamples);
 
-		auto distances = calcPairwiseDistancesSq(xTest_, xTrain);
+		auto distances = kNN::util::calcPairwiseDistancesSq(xTest_, xTrain);
 
 		DistanceHeap heap(n_neighbours);
 		std::vector<int> classCounter(yMax - yMin + 1);
@@ -181,7 +181,7 @@ namespace kNN {
 		auto nSamples = xTest_.rows;
 		matrix::Vector1D yPred(nSamples);
 
-		auto distances = calcPairwiseDistancesSq(xTest_, xTrain);
+		auto distances = kNN::util::calcPairwiseDistancesSq(xTest_, xTrain);
 
 		std::vector<int> classCounter(yMax - yMin + 1);
 		std::vector<size_t> indices(yTrain.size());
@@ -190,6 +190,28 @@ namespace kNN {
 			auto distances_i = distances.row(i);
 			std::iota(indices.begin(), indices.end(), 0);
 			std::sort(indices.begin(), indices.end(),
+				[&distances_i](size_t i1, size_t i2) { return distances_i[i1] < distances_i[i2]; });
+			yPred[i] = classify(yTrain, std::span(indices).first(n_neighbours), classCounter, yMin);
+		}
+
+		return yPred;
+	}
+
+	matrix::Vector1D CustomKNeighborsClassifier::predictVectorizedPartition(const matrix::Matrix2D& xTest_) const
+	{
+		validate(xTest_);
+		auto nSamples = xTest_.rows;
+		matrix::Vector1D yPred(nSamples);
+
+		auto distances = kNN::util::calcPairwiseDistancesSq(xTest_, xTrain);
+
+		std::vector<int> classCounter(yMax - yMin + 1);
+		std::vector<size_t> indices(yTrain.size());
+
+		for (size_t i = 0; i < nSamples; i++) {
+			auto distances_i = distances.row(i);
+			std::iota(indices.begin(), indices.end(), 0);
+			std::nth_element(indices.begin(), indices.begin() + n_neighbours - 1, indices.end(),
 				[&distances_i](size_t i1, size_t i2) { return distances_i[i1] < distances_i[i2]; });
 			yPred[i] = classify(yTrain, std::span(indices).first(n_neighbours), classCounter, yMin);
 		}
@@ -207,6 +229,9 @@ namespace kNN {
 
 			case KNeighborsImplementation::VectorizedSort:
 				return predictVectorizedSort(xTest_);
+
+			case KNeighborsImplementation::VectorizedPartition:
+				return predictVectorizedPartition(xTest_);
 
 			default:
 				throw std::runtime_error(std::format("Unknown Implementation Method Requested: {}", static_cast<int>(impl)));

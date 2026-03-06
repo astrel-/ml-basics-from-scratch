@@ -13,6 +13,7 @@ int main() {
     auto yPredNaive = knnClassifier.predict(xTest, kNN::KNeighborsImplementation::Naive);
     auto yPredVec = knnClassifier.predict(xTest, kNN::KNeighborsImplementation::Vectorized);
     auto yPredVecSort = knnClassifier.predict(xTest, kNN::KNeighborsImplementation::VectorizedSort);
+    auto yPredVecPart = knnClassifier.predict(xTest, kNN::KNeighborsImplementation::VectorizedPartition);
 
     for (const auto& y : yPredNaive) {
         std::cout << static_cast<int>(y) << "\n";
@@ -23,6 +24,9 @@ int main() {
 
     auto matchScore2 = kNN::util::calcAccuracyScore(yPredVecSort, yPredVec);
     std::cout << "Match Score between Vectorized and VectorizedSort methods: " << matchScore2 << "\n";
+
+    auto matchScore3 = kNN::util::calcAccuracyScore(yPredVecSort, yPredVecPart);
+    std::cout << "Match Score between VectorizedSort and VectorizedPartition methods: " << matchScore2 << "\n";
 
     auto accuracyScore = kNN::util::calcAccuracyScore(yPredNaive, yTest);
     std::cout << "Accuracy Score: " << accuracyScore << "\n";
