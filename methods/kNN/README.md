@@ -227,6 +227,99 @@ The first `k` neighbours are then selected from the sorted list.
 
 ---
 
+# Building the C++ implementation
+
+The C++ code uses **CMake + vcpkg (manifest mode)** for dependency management.
+
+Dependencies are defined in:
+
+vcpkg.json
+
+---
+
+## 1. Install vcpkg
+
+Clone vcpkg somewhere on your system:
+
+```
+git clone https://github.com/microsoft/vcpkg.git
+```
+
+Bootstrap it:
+
+Linux / macOS:
+```
+./bootstrap-vcpkg.sh
+```
+Windows:
+```
+bootstrap-vcpkg.bat
+```
+---
+
+## 2. Configure the project
+
+From the repository root run:
+```
+cmake -S methods/knn/cpp ^
+      -B methods/knn/cpp/build ^
+      -DCMAKE_TOOLCHAIN_FILE=<path-to-vcpkg>/scripts/buildsystems/vcpkg.cmake ^
+      -DVCPKG_MANIFEST_DIR=.
+```
+
+vcpkg will automatically install the dependencies listed in vcpkg.json.
+
+---
+
+## 3. Build
+
+```
+cmake --build methods/knn/cpp/build
+```
+
+---
+
+## Notes
+
+VCPKG_MANIFEST_DIR is required because the vcpkg.json file lives in the repository root, while the CMakeLists.txt for the KNN implementation lives in:
+```
+methods/knn/cpp
+```
+---
+
+## Repository structure
+```
+ml-basics-from-scratch
+│
+├─ vcpkg.json
+├─ methods
+│   └─ knn
+│       └─ cpp
+│           ├─ CMakeLists.txt
+│           └─ src
+```
+---
+
+## Optional (recommended)
+
+Set an environment variable for vcpkg.
+
+Linux / macOS:
+```
+export VCPKG_ROOT=/path/to/vcpkg
+```
+Windows (PowerShell):
+```
+$env:VCPKG_ROOT="C:\path\to\vcpkg"
+```
+Then configuration becomes:
+```
+cmake -S methods/knn/cpp ^
+      -B methods/knn/cpp/build ^
+      -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%/scripts/buildsystems/vcpkg.cmake ^
+      -DVCPKG_MANIFEST_DIR=.
+```
+
 # Purpose of this experiment
 
 This implementation explores several practical lessons:
