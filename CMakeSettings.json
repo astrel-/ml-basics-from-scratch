@@ -12,6 +12,17 @@
             "ctestCommandArgs": ""
         },
         {
+            "name": "x64-Debug-Torch",
+            "generator": "Ninja",
+            "configurationType": "Debug",
+            "inheritEnvironments": [ "msvc_x64_x64" ],
+            "buildRoot": "${projectDir}\\out\\build\\${name}",
+            "installRoot": "${projectDir}\\out\\install\\${name}",
+            "cmakeCommandArgs": "-DVCPKG_MANIFEST_FEATURES=torch",
+            "buildCommandArgs": "",
+            "ctestCommandArgs": ""
+        },
+        {
             "name": "x64-Release",
             "generator": "Ninja",
             "configurationType": "RelWithDebInfo",
@@ -21,6 +32,18 @@
             "buildCommandArgs": "",
             "ctestCommandArgs": "",
             "inheritEnvironments": [ "msvc_x64_x64" ],
+            "variables": []
+        },
+        {
+            "name": "x64-Release-Torch",
+            "generator": "Ninja",
+            "configurationType": "RelWithDebInfo",
+            "inheritEnvironments": [ "msvc_x64_x64" ],
+            "buildRoot": "${projectDir}\\out\\build\\${name}",
+            "installRoot": "${projectDir}\\out\\install\\${name}",
+            "cmakeCommandArgs": "-DVCPKG_MANIFEST_FEATURES=torch",
+            "buildCommandArgs": "",
+            "ctestCommandArgs": "",
             "variables": []
         }
     ]
