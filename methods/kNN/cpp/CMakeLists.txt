@@ -7,50 +7,43 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # zlib comes from vcpkg (manifest: vcpkg.json at repo root)
 find_package(ZLIB REQUIRED)
 
+# openblas comes from vcpkg
+find_package(OpenBLAS CONFIG REQUIRED)
+
 # cnpy (vendored in repo)
 add_library(cnpy STATIC
-    ${CMAKE_CURRENT_LIST_DIR}/../../../third_party/cnpy/cnpy.cpp
+    ${CMAKE_SOURCE_DIR}/third_party/cnpy/cnpy.cpp
 )
-
-message(STATUS "CMAKE_SOURCE_DIR = ${CMAKE_SOURCE_DIR}")
-message(STATUS "CMAKE_CURRENT_SOURCE_DIR = ${CMAKE_CURRENT_SOURCE_DIR}")
 
 target_include_directories(cnpy PUBLIC
-    ${CMAKE_CURRENT_LIST_DIR}/../../../third_party/cnpy
+    ${CMAKE_SOURCE_DIR}/third_party/cnpy
 )
-target_link_libraries(cnpy PUBLIC ZLIB::ZLIB)
 
-# openblas
-find_package(OpenBLAS CONFIG REQUIRED)
+target_link_libraries(cnpy PUBLIC ZLIB::ZLIB)
 
 add_executable(knn
     src/main.cpp
     src/kNN.cpp
     src/io/numpy.cpp
     src/Matrix.cpp
-    src/LinAlg.cpp)
+    src/LinAlg.cpp
+)
 
-# Disable MSVC static analyzer warnings
 if (MSVC)
     target_compile_options(knn PRIVATE /W4 /analyze-)
 else()
     target_compile_options(knn PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
-get_filename_component(REPO_ROOT
-    "${CMAKE_CURRENT_LIST_DIR}/../../../"
-    ABSOLUTE
-)
 target_compile_definitions(knn PRIVATE
-    PROJECT_ROOT="${REPO_ROOT}"
-)
-target_compile_definitions(knn PRIVATE
-    TRAIN_DATA_PATH="${REPO_ROOT}/methods/kNN/data/train_data.npz"
-)
-target_compile_definitions(knn PRIVATE
-    TEST_DATA_PATH="${REPO_ROOT}/methods/kNN/data/test_data.npz"
+    PROJECT_ROOT="${CMAKE_SOURCE_DIR}"
+    TRAIN_DATA_PATH="${CMAKE_SOURCE_DIR}/methods/kNN/data/train_data.npz"
+    TEST_DATA_PATH="${CMAKE_SOURCE_DIR}/methods/kNN/data/test_data.npz"
 )
 
 target_include_directories(knn PRIVATE include)
-target_link_libraries(knn PRIVATE cnpy)
-target_link_libraries(knn PRIVATE OpenBLAS::OpenBLAS)
+
+target_link_libraries(knn PRIVATE
+    cnpy
+    OpenBLAS::OpenBLAS
+)

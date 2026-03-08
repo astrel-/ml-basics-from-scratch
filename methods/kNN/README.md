@@ -261,46 +261,12 @@ bootstrap-vcpkg.bat
 
 From the repository root run:
 ```
-cmake -S methods/knn/cpp ^
-      -B methods/knn/cpp/build ^
-      -DCMAKE_TOOLCHAIN_FILE=<path-to-vcpkg>/scripts/buildsystems/vcpkg.cmake ^
-      -DVCPKG_MANIFEST_DIR=.
+cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=<path/to/vcpkg>/scripts/buildsystems/vcpkg.cmake
 ```
 
 vcpkg will automatically install the dependencies listed in vcpkg.json.
 
----
-
-## 3. Build
-
-```
-cmake --build methods/knn/cpp/build
-```
-
----
-
-## Notes
-
-VCPKG_MANIFEST_DIR is required because the vcpkg.json file lives in the repository root, while the CMakeLists.txt for the KNN implementation lives in:
-```
-methods/knn/cpp
-```
----
-
-## Repository structure
-```
-ml-basics-from-scratch
-│
-├─ vcpkg.json
-├─ methods
-│   └─ knn
-│       └─ cpp
-│           ├─ CMakeLists.txt
-│           └─ src
-```
----
-
-## Optional (recommended)
+### Optional (recommended)
 
 Set an environment variable for vcpkg.
 
@@ -312,13 +278,34 @@ Windows (PowerShell):
 ```
 $env:VCPKG_ROOT="C:\path\to\vcpkg"
 ```
-Then configuration becomes:
+Then the configure step becomes
 ```
-cmake -S methods/knn/cpp ^
-      -B methods/knn/cpp/build ^
-      -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%/scripts/buildsystems/vcpkg.cmake ^
-      -DVCPKG_MANIFEST_DIR=.
+cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%/scripts/buildsystems/vcpkg.cmake
 ```
+
+---
+
+## 3. Build
+
+```
+cmake --build build
+```
+
+---
+
+## Repository structure
+```
+ml-basics-from-scratch
+│
+├─ vcpkg.json
+├─ CMakeLists.txt
+├─ methods
+│   └─ knn
+│       └─ cpp
+│           └─ src
+```
+---
+
 
 # Purpose of this experiment
 
