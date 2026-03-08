@@ -284,6 +284,26 @@ Then the configure step becomes
 cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%/scripts/buildsystems/vcpkg.cmake
 ```
 
+### Enabling LibTorch
+
+LibTorch is provided as an optional dependency through vcpkg.
+
+The feature can be enabled when configuring CMake.
+
+Example:
+```
+cmake -B build -S . \
+  -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%/scripts/buildsystems/vcpkg.cmake \
+  -DVCPKG_MANIFEST_FEATURES=torch
+```
+This installs the LibTorch dependency and enables the Torch-based implementation in the build.
+
+The code paths are conditionally compiled using:
+```
+#ifdef KNN_USE_TORCH
+```
+If LibTorch is not installed, the project builds normally using only the native C++ implementation.
+
 ---
 
 ## 3. Build
