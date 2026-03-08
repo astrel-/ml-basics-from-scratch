@@ -24,6 +24,10 @@ namespace matrix {
 		return buffer.data();
 	}
 
+	double* Matrix2D::data() {
+		return buffer.data();
+	}
+
 	double& Matrix2D::operator() (size_t row, size_t col) {
 		return buffer[row * cols + col];
 	}

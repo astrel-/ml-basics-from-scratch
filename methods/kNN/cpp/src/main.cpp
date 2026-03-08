@@ -9,9 +9,18 @@ int main() {
     auto [xTrain, yTrain] = io::numpy::readXY(TRAIN_DATA_PATH);
     auto [xTest, yTest] = io::numpy::readXY(TEST_DATA_PATH);
 
-    int k = 3;
+    int k = 20;
     kNN::CustomKNeighborsClassifier knnClassifier(k);
     knnClassifier.fit(xTrain, yTrain);
+#ifdef KNN_USE_TORCH
+    auto [xTrainTs, yTrainTs] = io::numpy::tensor::readXY(TRAIN_DATA_PATH);
+    auto [xTestTs, yTestTs] = io::numpy::tensor::readXY(TEST_DATA_PATH);
+
+    kNN::TorchKNeighborsClassifier torchKnnClassifier(k);
+    torchKnnClassifier.fit(xTrainTs, yTrainTs);
+    auto yPredTs = torchKnnClassifier.predict(xTestTs);
+    std::cout << yPredTs << std::endl;
+#endif
 
     auto yPredNaive = knnClassifier.predict(xTest, kNN::KNeighborsImplementation::Naive);
     auto yPredVec = knnClassifier.predict(xTest, kNN::KNeighborsImplementation::VectorizedHeap);
@@ -30,6 +39,11 @@ int main() {
 
     auto matchScore3 = kNN::util::calcAccuracyScore(yPredVecSort, yPredVecPart);
     std::cout << "Match Score between VectorizedSort and VectorizedPartition methods: " << matchScore3 << "\n";
+
+#ifdef KNN_USE_TORCH
+    auto accuracyScore0 = kNN::util::calcAccuracyScore(yPredTs, yTestTs);
+    std::cout << "Accuracy Score [LibTorch]: " << accuracyScore0 << "\n";
+#endif
 
     auto accuracyScore = kNN::util::calcAccuracyScore(yPredNaive, yTest);
     std::cout << "Accuracy Score: " << accuracyScore << "\n";
@@ -52,9 +66,18 @@ int main() {
         knnClassifier.predict(xTest, kNN::KNeighborsImplementation::VectorizedPartition);
     }
     auto t5 = std::chrono::steady_clock::now();
+#ifdef KNN_USE_TORCH
+    for (int nRun = 0; nRun < nRuns; nRun++) {
+        torchKnnClassifier.predict(xTestTs);
+    }
+    auto t6 = std::chrono::steady_clock::now();
+#endif
 
     std::cout << std::format("{:<40} {}\n", "Performance [Naive]:", std::chrono::duration_cast<std::chrono::microseconds>((t2 - t1) / nRuns));
     std::cout << std::format("{:<40} {}\n", "Performance [VectorizedHeap]:", std::chrono::duration_cast<std::chrono::microseconds>((t3 - t2) / nRuns));
     std::cout << std::format("{:<40} {}\n", "Performance [VectorizedSort]:", std::chrono::duration_cast<std::chrono::microseconds>((t4 - t3) / nRuns));
     std::cout << std::format("{:<40} {}\n", "Performance [VectorizedPartition]:", std::chrono::duration_cast<std::chrono::microseconds>((t5 - t4) / nRuns));
+#ifdef KNN_USE_TORCH
+    std::cout << std::format("{:<40} {}\n", "Performance [LibTorch]:", std::chrono::duration_cast<std::chrono::microseconds>((t6- t5) / nRuns));
+#endif
 }

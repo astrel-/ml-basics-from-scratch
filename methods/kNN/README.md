@@ -21,6 +21,7 @@ Example timings (microseconds per run):
 | VectorizedHeap | C++ | **97 µs** | 197 µs |
 | VectorizedSort | C++ | 653 µs | 640 µs |
 | VectorizedPartition | C++ | 119 µs | **146 µs** |
+| VectorizedLibTorch | C++ | 424 µs | 823 µs |
 | scikit-learn | Python | 594 µs | 677 µs |
 | VectorizedSort | Python | 408 µs | **399 µs** |
 | VectorizedPartition | Python | **403 µs** | 432 µs |

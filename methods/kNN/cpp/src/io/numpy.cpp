@@ -4,6 +4,9 @@
 #include <cstdint>
 #include <stdexcept>
 #include <vector>
+#ifdef KNN_USE_TORCH
+#include <torch/torch.h>
+#endif
 
 namespace io::numpy {
 
@@ -43,3 +46,30 @@ namespace io::numpy {
         return array.as_vec<std::int8_t>();
     }
 }
+
+#ifdef KNN_USE_TORCH
+namespace io::numpy::tensor {
+    torch::Tensor toTensorDouble(matrix::Matrix2D& m) {
+        return torch::from_blob(
+            m.data(),
+            { static_cast<int64_t>(m.rows), static_cast<int64_t>(m.cols) },
+            torch::kFloat64
+        ).clone();
+    }
+
+    torch::Tensor toTensorInt8(matrix::Vector1D& v) {
+        return torch::from_blob(
+            v.data(),
+            { static_cast<int64_t>(v.size()) },
+            torch::kInt8
+        ).clone();
+    }
+
+    struct XY readXY(const char* filePath) {
+        auto [X, y] = io::numpy::readXY(filePath);
+        auto xTs = toTensorDouble(X);
+        auto yTs = toTensorInt8(y);
+        return { xTs, yTs };
+    }
+}
+#endif

@@ -8,6 +8,9 @@
 #include <algorithm>
 #include <cstdint>
 #include <numeric> 
+#ifdef KNN_USE_TORCH
+#include <torch/torch.h>
+#endif
 
 namespace kNN {
 	namespace util {
@@ -53,6 +56,15 @@ namespace kNN {
 			}
 			return 1.0 * sum / n;
 		}
+
+#ifdef KNN_USE_TORCH
+		double calcAccuracyScore(const torch::Tensor& yPred, const torch::Tensor& yTest)
+		{
+			auto correct = (yPred == yTest).sum().item<int64_t>();
+			auto n = yPred.size(0);
+			return static_cast<double>(correct) / n;
+		}
+#endif
 	}
 }
 
@@ -238,3 +250,46 @@ namespace kNN {
 		}
 	}
 }
+
+#ifdef KNN_USE_TORCH
+namespace kNN {
+		TorchKNeighborsClassifier::TorchKNeighborsClassifier(int n)
+			: n_neighbours(n) {
+		}
+
+		void TorchKNeighborsClassifier::fit(const torch::Tensor& xTrain_, const torch::Tensor& yTrain_) {
+			xTrain = xTrain_;
+			yTrain = yTrain_;
+			yMax = yTrain.max().item<int64_t>();
+			yMin = yTrain.min().item<int64_t>();
+		}
+
+		torch::Tensor TorchKNeighborsClassifier::predict(const torch::Tensor& xTest_) {
+			// [n_test, n_train]
+			auto distances = torch::cdist(xTest_, xTrain, 2.0);
+
+			// smallest k distances along train dimension
+			auto topk = torch::topk(distances, n_neighbours, /*dim=*/1, /*largest=*/false, /*sorted=*/false);
+			auto knn_idx = std::get<1>(topk);   // [n_test, k]
+
+			// gather labels
+			auto neighbour_labels =
+				yTrain.index_select(0, knn_idx.reshape({ -1 }))
+				.reshape({ xTest_.size(0), n_neighbours })
+				.to(torch::kInt64);;   // [n_test, k]
+
+			auto num_classes = yMax - yMin + 1;
+
+			auto votes = torch::zeros(
+				{ xTest_.size(0), num_classes },
+				torch::TensorOptions().dtype(torch::kInt64));
+
+			votes.scatter_add_(
+				1,
+				neighbour_labels,
+				torch::ones_like(neighbour_labels, torch::TensorOptions().dtype(torch::kInt64)));
+
+			return std::get<1>(votes.max(1));   // [n_test]
+		}
+}
+#endif

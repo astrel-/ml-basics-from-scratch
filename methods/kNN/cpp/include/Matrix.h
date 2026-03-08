@@ -26,6 +26,7 @@ namespace matrix {
         size_t rows;
         size_t cols;
         const double* data() const;
+        double* data();
 
     private:
         std::vector<double> buffer;

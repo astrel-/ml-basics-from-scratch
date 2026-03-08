@@ -4,6 +4,9 @@
 #include <vector>
 #include <cstdint>
 #include <span>
+#ifdef KNN_USE_TORCH
+#include <torch/torch.h>
+#endif
 
 namespace kNN {
 
@@ -38,10 +41,31 @@ namespace kNN {
 	};
 }
 
+
+#ifdef KNN_USE_TORCH
+namespace kNN {
+		class TorchKNeighborsClassifier {
+		public:
+			TorchKNeighborsClassifier(int n);
+			void fit(const torch::Tensor& xTrain_, const torch::Tensor& yTrain_);
+			torch::Tensor predict(const torch::Tensor& xTest_);
+		private:
+			int n_neighbours;
+			torch::Tensor xTrain;
+			torch::Tensor yTrain;
+			std::int64_t yMax = 0;
+			std::int64_t yMin = 0;
+		};
+}
+#endif
+
 namespace kNN {
 	namespace util {
 		double calcDistanceSq(std::span<const double> x, std::span<const double> other);
 		double calcAccuracyScore(const matrix::Vector1D& yPred, const matrix::Vector1D& yTest);
+#ifdef KNN_USE_TORCH
+		double calcAccuracyScore(const torch::Tensor& yPred, const torch::Tensor& yTest);
+#endif
 
 		struct DistanceIndex {
 			double distance;
