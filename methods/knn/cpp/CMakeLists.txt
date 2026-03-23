@@ -26,10 +26,10 @@ target_link_libraries(cnpy PUBLIC ZLIB::ZLIB)
 
 add_executable(knn
     src/main.cpp
-    src/kNN.cpp
+    src/knn.cpp
     src/io/numpy.cpp
-    src/Matrix.cpp
-    src/LinAlg.cpp
+    src/matrix.cpp
+    src/linalg.cpp
 )
 
 if (MSVC)
@@ -40,8 +40,8 @@ endif()
 
 target_compile_definitions(knn PRIVATE
     PROJECT_ROOT="${CMAKE_SOURCE_DIR}"
-    TRAIN_DATA_PATH="${CMAKE_SOURCE_DIR}/methods/kNN/data/train_data.npz"
-    TEST_DATA_PATH="${CMAKE_SOURCE_DIR}/methods/kNN/data/test_data.npz"
+    TRAIN_DATA_PATH="${CMAKE_SOURCE_DIR}/methods/knn/data/train_data.npz"
+    TEST_DATA_PATH="${CMAKE_SOURCE_DIR}/methods/knn/data/test_data.npz"
 )
 
 target_include_directories(knn PRIVATE include)

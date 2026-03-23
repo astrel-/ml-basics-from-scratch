@@ -1,5 +1,5 @@
-#include "LinAlg.h"
-#include "Matrix.h"
+#include "linalg.h"
+#include "matrix.h"
 #include <cblas.h>
 #include <limits>
 #include <stdexcept>

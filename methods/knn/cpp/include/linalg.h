@@ -1,5 +1,5 @@
 #pragma once
-#include "Matrix.h"
+#include "matrix.h"
 
 namespace linalg {
     matrix::Matrix2D matmul_AB(const matrix::Matrix2D& A, const matrix::Matrix2D& B, double alpha = 1.0);

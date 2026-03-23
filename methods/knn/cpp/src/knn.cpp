@@ -1,6 +1,6 @@
-#include "kNN.h"
-#include "Matrix.h"
-#include "LinAlg.h"
+#include "knn.h"
+#include "matrix.h"
+#include "linalg.h"
 #include <format>
 #include <stdexcept>
 #include <span>
