@@ -8,7 +8,7 @@
 
 namespace linalg {
 
-    static std::vector<double> matmul_AB_raw(
+    [[maybe_unused]] static std::vector<double> matmul_AB_raw(
         const double* A,
         const double* B,
         int k,

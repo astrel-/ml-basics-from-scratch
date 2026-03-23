@@ -1,5 +1,5 @@
 #include "io/numpy.h"
-#include "Matrix.h"
+#include "matrix.h"
 #include <cnpy.h>
 #include <cstdint>
 #include <stdexcept>

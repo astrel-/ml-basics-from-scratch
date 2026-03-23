@@ -1,5 +1,5 @@
 #pragma once
-#include "Matrix.h"
+#include "matrix.h"
 #ifdef KNN_USE_TORCH
 #include <torch/torch.h>
 #endif

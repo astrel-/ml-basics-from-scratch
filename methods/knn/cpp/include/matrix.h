@@ -21,15 +21,14 @@ namespace matrix {
         void add_to_row(size_t row_idx, double scalar);
         void add_to_col(size_t col_idx, double scalar);
 
+    private:
+        std::vector<double> buffer;
 
     public:
         size_t rows;
         size_t cols;
         const double* data() const;
         double* data();
-
-    private:
-        std::vector<double> buffer;
     };
 
 
