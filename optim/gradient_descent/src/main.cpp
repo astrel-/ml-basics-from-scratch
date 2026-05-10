@@ -62,6 +62,8 @@ int main() {
 
     std::cout << arr1.norm_L_inf() << " " << arr1.norm_L2() << "\n";
     std::cout << res.norm_L_inf() << " " << res.norm_L2() << "\n";
+    std::cout << arr1;
+
 
     //int a1 = 2.0;
     //int a2 = 3.0;

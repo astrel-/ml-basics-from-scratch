@@ -2,6 +2,7 @@
 #include <array>
 #include <cmath>
 #include <ranges>
+#include <iostream>
 
 namespace containers {
 
@@ -51,6 +52,15 @@ class array {
             norm = std::max(norm, std::abs(x));
         }
         return norm;
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const array& arr) { 
+        os << "[";
+        for (const auto x : arr.array_) {
+            os << "\t" << x << ",";
+        }
+        os << "]";
+        return os;
     }
 };
 
