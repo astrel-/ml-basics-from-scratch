@@ -1,8 +1,8 @@
 add_library(gradient_descent
-    src/gradient_descent.cpp
- "src/main.cpp")
+    src/gradient_descent.cpp)
 
 target_include_directories(gradient_descent PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../include
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
