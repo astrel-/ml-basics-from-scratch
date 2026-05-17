@@ -1,6 +1,6 @@
 add_executable(container_tests
     containers/test_array.cpp
-)
+    containers/test_matrix.cpp)
 
 target_link_libraries(container_tests PRIVATE
     GTest::gtest_main
