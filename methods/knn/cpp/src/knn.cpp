@@ -1,5 +1,5 @@
 #include "knn.h"
-#include "matrix.h"
+#include <containers/matrix.h>
 #include "linalg.h"
 #include <format>
 #include <stdexcept>
@@ -32,10 +32,10 @@ namespace kNN {
 			return product;
 		}
 
-		matrix::Matrix2D calcPairwiseDistancesSq(const matrix::Matrix2D& xTest, const matrix::Matrix2D& xTrain) {
+		containers::matrix calcPairwiseDistancesSq(const containers::matrix& xTest, const containers::matrix& xTrain) {
 			// Matrix of pairwise distances from XTest to XTrain
 			// ||a-b||^2 = A^2 + B^2 - 2*AB^T
-			matrix::Matrix2D distances = linalg::matmul_AB_T(xTest, xTrain, /*alpha=*/-2.0);
+			containers::matrix distances = linalg::matmul_AB_T(xTest, xTrain, /*alpha=*/-2.0);
 			for (size_t row_idx = 0; row_idx < xTest.rows; row_idx++) {
 				auto aSq = calcSq(xTest.row(row_idx));
 				distances.add_to_row(row_idx, aSq);
@@ -47,7 +47,7 @@ namespace kNN {
 			return distances;
 		}
 
-		double calcAccuracyScore(const matrix::Vector1D& yPred, const matrix::Vector1D& yTest)
+		double calcAccuracyScore(const containers::Vector1D& yPred, const containers::Vector1D& yTest)
 		{
 			int sum = 0;
 			auto n = yPred.size();
@@ -72,7 +72,7 @@ using DistanceHeap = kNN::util::MaxHeapMaxSize<kNN::util::DistanceIndex, kNN::ut
 
 namespace kNN {
 
-	static std::int8_t classifyAndEmptyHeap(DistanceHeap& heap, const matrix::Vector1D& yTrain, std::vector<int>& classCounter, std::int8_t yMin) {
+	static std::int8_t classifyAndEmptyHeap(DistanceHeap& heap, const containers::Vector1D& yTrain, std::vector<int>& classCounter, std::int8_t yMin) {
 		while (!heap.empty()) {
 			auto [_, index] = heap.top();
 			auto yClass = static_cast<int8_t>(yTrain[index]);
@@ -96,7 +96,7 @@ namespace kNN {
 		return maxClassIndex + yMin;
 	}
 
-	static std::int8_t classify(const matrix::Vector1D& yTrain, std::span<const size_t> nearestIndices, std::vector<int>& classCounter, std::int8_t yMin) {
+	static std::int8_t classify(const containers::Vector1D& yTrain, std::span<const size_t> nearestIndices, std::vector<int>& classCounter, std::int8_t yMin) {
 		for (const auto& idx : nearestIndices) {
 			auto yClass = static_cast<int8_t>(yTrain[idx]);
 			int clsIdx = yClass - yMin;
@@ -121,7 +121,7 @@ namespace kNN {
 	CustomKNeighborsClassifier::CustomKNeighborsClassifier(int n)
 		: n_neighbours(n) { }
 
-	void CustomKNeighborsClassifier::fit(const matrix::Matrix2D& xTrain_, const matrix::Vector1D& yTrain_) {
+	void CustomKNeighborsClassifier::fit(const containers::matrix& xTrain_, const containers::Vector1D& yTrain_) {
 		xTrain = xTrain_;
 		yTrain = yTrain_;
 		nTrainSamples = xTrain_.rows;
@@ -131,7 +131,7 @@ namespace kNN {
 		yMin = *minIt;
 	}
 
-	void CustomKNeighborsClassifier::validate(const matrix::Matrix2D& xTest_) const {
+	void CustomKNeighborsClassifier::validate(const containers::matrix& xTest_) const {
 		if (nTrainSamples == 0) {
 			throw std::runtime_error("Fit Method hasn't been called. Please call it first");
 		}
@@ -142,11 +142,11 @@ namespace kNN {
 			throw std::runtime_error(std::format("Train Data has fewer samples ({}) than k={}.", nTrainSamples, n_neighbours));
 	}
 
-	matrix::Vector1D CustomKNeighborsClassifier::predictNaive(const matrix::Matrix2D& xTest_) const
+	containers::Vector1D CustomKNeighborsClassifier::predictNaive(const containers::matrix& xTest_) const
 	{
 		validate(xTest_);
 		auto nSamples = xTest_.rows;
-		matrix::Vector1D yPred (nSamples);
+		containers::Vector1D yPred (nSamples);
 		DistanceHeap heap(n_neighbours);
 		std::vector<int> classCounter(yMax - yMin + 1);
 
@@ -164,11 +164,11 @@ namespace kNN {
 		return yPred;
 	}
 
-	matrix::Vector1D CustomKNeighborsClassifier::predictVectorizedHeap(const matrix::Matrix2D& xTest_) const
+	containers::Vector1D CustomKNeighborsClassifier::predictVectorizedHeap(const containers::matrix& xTest_) const
 	{
 		validate(xTest_);
 		auto nSamples = xTest_.rows;
-		matrix::Vector1D yPred(nSamples);
+		containers::Vector1D yPred(nSamples);
 
 		auto distances = kNN::util::calcPairwiseDistancesSq(xTest_, xTrain);
 
@@ -187,11 +187,11 @@ namespace kNN {
 		return yPred;
 	}
 
-	matrix::Vector1D CustomKNeighborsClassifier::predictVectorizedSort(const matrix::Matrix2D& xTest_) const
+	containers::Vector1D CustomKNeighborsClassifier::predictVectorizedSort(const containers::matrix& xTest_) const
 	{
 		validate(xTest_);
 		auto nSamples = xTest_.rows;
-		matrix::Vector1D yPred(nSamples);
+		containers::Vector1D yPred(nSamples);
 
 		auto distances = kNN::util::calcPairwiseDistancesSq(xTest_, xTrain);
 
@@ -209,11 +209,11 @@ namespace kNN {
 		return yPred;
 	}
 
-	matrix::Vector1D CustomKNeighborsClassifier::predictVectorizedPartition(const matrix::Matrix2D& xTest_) const
+	containers::Vector1D CustomKNeighborsClassifier::predictVectorizedPartition(const containers::matrix& xTest_) const
 	{
 		validate(xTest_);
 		auto nSamples = xTest_.rows;
-		matrix::Vector1D yPred(nSamples);
+		containers::Vector1D yPred(nSamples);
 
 		auto distances = kNN::util::calcPairwiseDistancesSq(xTest_, xTrain);
 
@@ -231,7 +231,7 @@ namespace kNN {
 		return yPred;
 	}
 
-	matrix::Vector1D CustomKNeighborsClassifier::predict(const matrix::Matrix2D& xTest_, KNeighborsImplementation impl) const {
+	containers::Vector1D CustomKNeighborsClassifier::predict(const containers::matrix& xTest_, KNeighborsImplementation impl) const {
 		switch (impl) {
 			case KNeighborsImplementation::Naive:
 				return predictNaive(xTest_);

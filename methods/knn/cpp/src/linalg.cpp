@@ -1,5 +1,5 @@
 #include "linalg.h"
-#include "matrix.h"
+#include <containers/matrix.h>
 #include <cblas.h>
 #include <limits>
 #include <stdexcept>
@@ -71,7 +71,7 @@ namespace linalg {
         return static_cast<int>(value);
     }
 
-    matrix::Matrix2D matmul_AB(const matrix::Matrix2D& A, const matrix::Matrix2D& B, double alpha) {
+    containers::matrix matmul_AB(const containers::matrix& A, const containers::matrix& B, double alpha) {
         auto k = size_t_to_int(A.rows);
         auto m = size_t_to_int(A.cols);
         if (m != size_t_to_int(B.rows))
@@ -79,10 +79,10 @@ namespace linalg {
         auto n = size_t_to_int(B.cols);
 
         auto buffer = matmul_AB_T_raw(A.data(), B.data(), k, m, n, alpha);
-        return matrix::Matrix2D(std::move(buffer), k, n);
+        return containers::matrix(std::move(buffer), k, n);
     }
 
-    matrix::Matrix2D matmul_AB_T(const matrix::Matrix2D& A, const matrix::Matrix2D& B, double alpha) {
+    containers::matrix matmul_AB_T(const containers::matrix& A, const containers::matrix& B, double alpha) {
         auto k = size_t_to_int(A.rows);
         auto m = size_t_to_int(A.cols);
         if (m != size_t_to_int(B.cols))
@@ -90,6 +90,6 @@ namespace linalg {
         auto n = size_t_to_int(B.rows);
 
         auto buffer = matmul_AB_T_raw(A.data(), B.data(), k, m, n, alpha);
-        return matrix::Matrix2D(std::move(buffer), k, n);
+        return containers::matrix(std::move(buffer), k, n);
     }
 }

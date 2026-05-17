@@ -1,5 +1,5 @@
 #pragma once
-#include "matrix.h"
+#include <containers/matrix.h>
 #include <queue>
 #include <vector>
 #include <cstdint>
@@ -21,23 +21,24 @@ namespace kNN {
 
 	public:
 		CustomKNeighborsClassifier(int n);
-		void fit(const matrix::Matrix2D& xTrain_, const matrix::Vector1D& yTrain_);
-		matrix::Vector1D predict(const matrix::Matrix2D& xTest_, KNeighborsImplementation impl = KNeighborsImplementation::Naive) const;
+          void fit(const containers::matrix &xTrain_, const containers::Vector1D &yTrain_);
+          containers::Vector1D predict(const containers::matrix &xTest_,
+                        KNeighborsImplementation impl = KNeighborsImplementation::Naive) const;
 
 	private:
 		int n_neighbours;
-		matrix::Matrix2D xTrain{};
-		matrix::Vector1D yTrain{};
+        containers::matrix xTrain{};
+		containers::Vector1D yTrain{};
 		std::int8_t yMax = 0;
 		std::int8_t yMin = 0;
 		size_t nTrainSamples = 0;
 		size_t nFeatures = 0;
 
-		void validate(const matrix::Matrix2D& xTest_) const;
-		matrix::Vector1D predictNaive(const matrix::Matrix2D& xTest_) const;
-		matrix::Vector1D predictVectorizedHeap(const matrix::Matrix2D& xTest_) const;
-		matrix::Vector1D predictVectorizedSort(const matrix::Matrix2D& xTest_) const;
-		matrix::Vector1D predictVectorizedPartition(const matrix::Matrix2D& xTest_) const;
+		void validate(const containers::matrix &xTest_) const;
+		containers::Vector1D predictNaive(const containers::matrix &xTest_) const;
+        containers::Vector1D predictVectorizedHeap(const containers::matrix &xTest_) const;
+		containers::Vector1D predictVectorizedSort(const containers::matrix &xTest_) const;
+		containers::Vector1D predictVectorizedPartition(const containers::matrix &xTest_) const;
 	};
 }
 
@@ -62,7 +63,8 @@ namespace kNN {
 namespace kNN {
 	namespace util {
 		double calcDistanceSq(std::span<const double> x, std::span<const double> other);
-		double calcAccuracyScore(const matrix::Vector1D& yPred, const matrix::Vector1D& yTest);
+        double calcAccuracyScore(const containers::Vector1D &yPred,
+                                 const containers::Vector1D &yTest);
 #ifdef KNN_USE_TORCH
 		double calcAccuracyScore(const torch::Tensor& yPred, const torch::Tensor& yTest);
 #endif

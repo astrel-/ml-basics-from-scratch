@@ -1,5 +1,5 @@
 #pragma once
-#include "matrix.h"
+#include <containers/matrix.h>
 #ifdef KNN_USE_TORCH
 #include <torch/torch.h>
 #endif
@@ -9,9 +9,9 @@ namespace cnpy {
 }
 
 namespace io::numpy {
-	matrix::XY readXY(const char* filePath);
-	matrix::Matrix2D read2D(const cnpy::NpyArray& array);
-	matrix::Vector1D read1D(const cnpy::NpyArray& array);
+	containers::XY readXY(const char *filePath);
+	containers::matrix read2D(const cnpy::NpyArray &array);
+	containers::Vector1D read1D(const cnpy::NpyArray &array);
 }
 
 #ifdef KNN_USE_TORCH

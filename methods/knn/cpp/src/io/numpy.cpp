@@ -1,5 +1,5 @@
 #include "io/numpy.h"
-#include "matrix.h"
+#include <containers/matrix.h>
 #include <cnpy.h>
 #include <cstdint>
 #include <stdexcept>
@@ -10,14 +10,14 @@
 
 namespace io::numpy {
 
-    matrix::XY readXY(const char* filePath) {
+    containers::XY readXY(const char *filePath) {
         auto data = cnpy::npz_load(filePath);
         auto xArr = read2D(data["X"]);
         auto yArr = read1D(data["y"]);
         return { xArr, yArr };
     }
 
-    matrix::Matrix2D read2D(const cnpy::NpyArray& array) {
+    containers::matrix read2D(const cnpy::NpyArray& array) {
         // consider avoiding copy later
         if (array.fortran_order)
             throw std::runtime_error("Only C order is supported at the moment");
@@ -29,10 +29,10 @@ namespace io::numpy {
         auto buffer = array.as_vec<double>();
         auto rows = array.shape[0];
         auto cols = array.shape[1];
-        return matrix::Matrix2D(buffer, rows, cols);
+        return containers::matrix(buffer, rows, cols);
     }
 
-    matrix::Vector1D read1D(const cnpy::NpyArray& array) {
+    containers::Vector1D read1D(const cnpy::NpyArray &array) {
         const auto& shape = array.shape;
         if (shape.size() > 2)
             throw std::runtime_error("Must be either 2D-array or 1D-array");
@@ -49,7 +49,7 @@ namespace io::numpy {
 
 #ifdef KNN_USE_TORCH
 namespace io::numpy::tensor {
-    torch::Tensor toTensorDouble(matrix::Matrix2D& m) {
+torch::Tensor toTensorDouble(containers::matrix &m) {
         return torch::from_blob(
             m.data(),
             { static_cast<int64_t>(m.rows), static_cast<int64_t>(m.cols) },
@@ -57,7 +57,7 @@ namespace io::numpy::tensor {
         ).clone();
     }
 
-    torch::Tensor toTensorInt8(matrix::Vector1D& v) {
+    torch::Tensor toTensorInt8(containers::Vector1D &v) {
         return torch::from_blob(
             v.data(),
             { static_cast<int64_t>(v.size()) },

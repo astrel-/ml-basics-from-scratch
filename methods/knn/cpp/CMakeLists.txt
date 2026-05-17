@@ -16,6 +16,7 @@ add_library(cnpy STATIC
 )
 
 target_include_directories(cnpy PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../../include
     ${CMAKE_SOURCE_DIR}/third_party/cnpy
 )
 
@@ -25,7 +26,7 @@ add_executable(knn
     src/main.cpp
     src/knn.cpp
     src/io/numpy.cpp
-    src/matrix.cpp
+    
     src/linalg.cpp
 )
 
