@@ -1,19 +1,13 @@
 cmake_minimum_required(VERSION 3.20)
 project(knn_cpp LANGUAGES CXX)
 
-# zlib comes from vcpkg (manifest: vcpkg.json at repo root)
-find_package(ZLIB REQUIRED)
-
-# openblas comes from vcpkg
-find_package(OpenBLAS CONFIG REQUIRED)
-
 # optional dependency for libtorch
 find_package(Torch QUIET)
 
 add_executable(knn
     src/main.cpp
     src/knn.cpp
-    src/linalg.cpp
+    
 )
 
 if (MSVC)
@@ -32,8 +26,6 @@ target_include_directories(knn PRIVATE include)
 
 target_link_libraries(knn PRIVATE
     ml_core
-    cnpy
-    OpenBLAS::OpenBLAS
 )
 
 if (Torch_FOUND)

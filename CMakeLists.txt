@@ -9,7 +9,10 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 enable_testing()
 
 find_package(GTest CONFIG REQUIRED)
+# zlib comes from vcpkg (manifest: vcpkg.json at repo root)
 find_package(ZLIB REQUIRED)
+# openblas comes from vcpkg
+find_package(OpenBLAS CONFIG REQUIRED)
 
 # cnpy (vendored in repo)
 add_library(cnpy STATIC
@@ -22,6 +25,7 @@ target_link_libraries(cnpy PUBLIC
     ZLIB::ZLIB
 )
 add_library(ml_core
+    src/math/linalg.cpp
     src/io/numpy.cpp
 )
 target_include_directories(ml_core PUBLIC
@@ -29,6 +33,7 @@ target_include_directories(ml_core PUBLIC
 )
 target_link_libraries(ml_core PUBLIC
     cnpy
+    OpenBLAS::OpenBLAS
 )
 
 add_subdirectory(methods/knn/cpp)
