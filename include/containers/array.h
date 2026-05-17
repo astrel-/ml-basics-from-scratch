@@ -1,8 +1,8 @@
 #pragma once
 #include <array>
 #include <cmath>
-#include <ranges>
 #include <iostream>
+#include <ranges>
 
 namespace containers {
 
@@ -23,6 +23,8 @@ class array {
     }
 
     std::size_t size() const { return N; }
+    const double &operator[](size_t index) const { return array_[index]; }
+    double &operator[](size_t index) { return array_[index]; }
 
     void operator+=(const array &other) {
         for (int index = 0; index != N; ++index) {
@@ -54,7 +56,7 @@ class array {
         return norm;
     }
 
-    friend std::ostream& operator<<(std::ostream& os, const array& arr) { 
+    friend std::ostream &operator<<(std::ostream &os, const array &arr) {
         os << "[";
         for (const auto x : arr.array_) {
             os << "\t" << x << ",";

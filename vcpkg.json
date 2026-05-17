@@ -1,7 +1,7 @@
 {
   "name": "ml-basics-from-scratch",
   "version-string": "0.1.0",
-  "dependencies": ["zlib", "openblas"],
+  "dependencies": ["zlib", "openblas", "gtest"],
   "features": {
     "torch": {
       "description": "Enable LibTorch-based experiments",
