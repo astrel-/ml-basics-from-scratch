@@ -1,4 +1,4 @@
-//#include "gradient_descent.h"
+#include "gradient_descent.h"
 #include <containers/array.h>
 #include <cstdarg>
 #include <functional>
