@@ -10,23 +10,9 @@ find_package(OpenBLAS CONFIG REQUIRED)
 # optional dependency for libtorch
 find_package(Torch QUIET)
 
-# cnpy (vendored in repo)
-add_library(cnpy STATIC
-    ${CMAKE_SOURCE_DIR}/third_party/cnpy/cnpy.cpp
-)
-
-target_include_directories(cnpy PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../../include
-    ${CMAKE_SOURCE_DIR}/third_party/cnpy
-)
-
-target_link_libraries(cnpy PUBLIC ZLIB::ZLIB)
-
 add_executable(knn
     src/main.cpp
     src/knn.cpp
-    src/io/numpy.cpp
-    
     src/linalg.cpp
 )
 
@@ -45,6 +31,7 @@ target_compile_definitions(knn PRIVATE
 target_include_directories(knn PRIVATE include)
 
 target_link_libraries(knn PRIVATE
+    ml_core
     cnpy
     OpenBLAS::OpenBLAS
 )
